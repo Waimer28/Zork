@@ -4,13 +4,18 @@ namespace Zork
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             Console.WriteLine("Welcome to Zork!");
+
+           
+           
+
 
             Commands command = Commands.UNKNOWN;
             while (command != Commands.QUIT)
             {
+                Console.WriteLine(Rooms[CurrentRoomIndex]);                
                 Console.Write(">");
                 command = ToCommand(Console.ReadLine().Trim());
 
@@ -27,15 +32,16 @@ namespace Zork
 
                     case Commands.NORTH:
                     case Commands.SOUTH:
-                    case Commands.WEST:
                     case Commands.EAST:
-                        outputString = $"You moved {command}";
+                    case Commands.WEST:
+                        outputString = Move(command) ? $"You moved {command}": "The way is shut!";
                         break;
 
                     default:
                         outputString = "Unknown command";
                         break;
                 }
+
 
                 Console.WriteLine(outputString);
             } 
@@ -44,5 +50,36 @@ namespace Zork
 
         private static Commands ToCommand(string commandString) => Enum.TryParse<Commands>(commandString, true, out Commands result) ? result : Commands.UNKNOWN;
 
+        private static bool Move(Commands command)
+        {
+            bool didMove = false;
+
+            switch (command)
+            {
+                case Commands.EAST when CurrentRoomIndex < Rooms.Length - 1:
+                    CurrentRoomIndex++;                   
+                    didMove = true;
+                    break;
+
+
+                case Commands.WEST when CurrentRoomIndex > 0:
+                    CurrentRoomIndex--;
+                    didMove = true;
+                    break;
+
+            }
+                    return didMove;
+        }
+
+        private static string[] Rooms =
+        {
+             "Forest",
+             "West of House",
+             "Behind House",
+             "Canyon View",
+             "Clearing"
+        };
+
+        private static int CurrentRoomIndex = 1;
     }
 }
