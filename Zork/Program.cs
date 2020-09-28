@@ -1,72 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
 
+
 namespace Zork
 {
     internal class Program
     {
-        private static string CurrentRoom
+        private static Room CurrentRoom
         {
             get
             {
                 return Rooms [Location.Row, Location.Column];
             }
-            set
-            {
-                for (int row = 0; row < Rooms.GetLength(0); row++)
-                {
-                    for (int column = 0; column < Rooms.GetLength(1); column++)
-                    {
-                        if (Rooms[row, column] == value)
-                        {
-                            Location = (row, column);
-                            return;
-                        }
-                    }
-                }
-            }
         }
         static void Main(string[] args)
         {
+            InitializeRoomDescriptions();
             Console.WriteLine("Welcome to Zork!");
 
             Commands command = Commands.UNKNOWN;
             while (command != Commands.QUIT)
             {         
-                Console.WriteLine($"{CurrentRoom}\n>");
+                Console.Write($"{CurrentRoom.Name}\n>");
                 command = ToCommand(Console.ReadLine().Trim());
 
+                string outputString;
                 switch (command)
                 {
                     case Commands.QUIT:
-                        Console.WriteLine("Thank you for playing!");
+                        outputString = "Thank you for playing!";
                         break;
 
                     case Commands.LOOK:
-                        Console.WriteLine("This is an open field west of a white house, with a boarded front door.\nA rubber mat saying 'Welcome to Zork!' lies by the door");
+                        outputString = CurrentRoom.Description;
                         break;
 
                     case Commands.NORTH:
                     case Commands.SOUTH:
                     case Commands.EAST:
                     case Commands.WEST:
-                        if (Move(command) == false)
-                        {
-                            Console.WriteLine("The way is shut!");
-                        }
+                        outputString = Move(command) ? $"You moved {command}" : "The way is shut!";
                         break;
 
                     default:
-                        Console.WriteLine("Unknown command.");
+                        outputString = "Unknown command.";
                         break;
                 }
+                Console.WriteLine(outputString);
             }
         }
 
         private static bool Move(Commands command)
         {
-            Assert.IsTrue(IsDirection(command), "Invalid direction");
-
             bool isValidMove = true;
             switch (command)
             {
@@ -95,13 +80,26 @@ namespace Zork
             return isValidMove;
         }
         private static Commands ToCommand(string commandString) => Enum.TryParse<Commands>(commandString, true, out Commands result) ? result : Commands.UNKNOWN;
-        private static bool IsDirection(Commands command) => Directions.Contains(command);
+        private static void InitializeRoomDescriptions()
+        {
+            Rooms[0, 0].Description = "You are on a rock-strewn trail.";
+            Rooms[0, 1].Description = "You are facing the south side of a white house. There is no door here, and all the windows are barred.";
+            Rooms[0, 2].Description = "You are at the top of the Great Canyon on its south wall.";
 
-        private static readonly string[,] Rooms =
-                {
-             { "Rocky Trail", "South of House", "Canyon View"},
-             { "Forest","West of House", "Behind House" },
-             { "Dense Woods", "North of House", "Clearing" }
+            Rooms[1, 0].Description = "This is a forest, with trees in all directions around you.";
+            Rooms[1, 1].Description = "This is an open field west of a white house, with a boarded front door.";
+            Rooms[1, 2].Description = "You are behind the white house. In one corner of the house there is a small window which is slightly ajar.";
+
+            Rooms[2, 0].Description = "This is a dimly lit forest, with a large trees all around. To the east, there appears to be sunlight.";
+            Rooms[2, 1].Description = "You are facing the north side of a white house. There is no door here, and all the windows are barred.";
+            Rooms[2, 2].Description = "You are in a clearing, with a forest surrounding you on the west and south.";
+        }
+
+        private static readonly Room[,] Rooms =
+        {
+             { new Room("Rocky Trail"), new Room("South of House"), new Room("Canyon View") },
+             { new Room("Forest"), new Room("West of House"), new Room ("Behind House") },
+             { new Room("Dense Woods"), new Room("North of House"), new Room("Clearing") }
         };
 
         private static readonly List<Commands> Directions = new List<Commands>
@@ -112,6 +110,6 @@ namespace Zork
             Commands.WEST
         };
 
-        private static (int Row, int Column) Location;
+        private static (int Row, int Column) Location = (1,1);
     }
 }
